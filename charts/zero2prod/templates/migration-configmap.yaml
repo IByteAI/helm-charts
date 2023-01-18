@@ -1,0 +1,10 @@
+{{- if .Files.Glob "files/migrations/*.sql" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-migrations" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+data:
+{{ (.Files.Glob "files/migrations/*.sql").AsConfig | indent 2 }}
+{{ end }}

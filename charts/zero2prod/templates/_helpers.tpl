@@ -1,0 +1,110 @@
+{{/*
+Expand the name of the chart.
+*/}}
+{{- define "zero2prod.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Create a default fully qualified app name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+If release name contains chart name it will be used as a full name.
+*/}}
+{{- define "zero2prod.fullname" -}}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create chart name and version as used by the chart label.
+*/}}
+{{- define "zero2prod.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Common labels
+*/}}
+{{- define "zero2prod.labels" -}}
+helm.sh/chart: {{ include "zero2prod.chart" . }}
+{{ include "zero2prod.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "zero2prod.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "zero2prod.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "zero2prod.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "zero2prod.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create a default fully qualified app name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "zero2prod.postgresql.fullname" -}}
+{{- include "common.names.dependency.fullname" (dict "chartName" "postgresql" "chartValues" .Values.postgresql "context" $) -}}
+{{- end -}}
+
+{{/*
+Return the postgresql Hostname
+*/}}
+{{- define "zero2prod.databaseHost" -}}
+    {{- printf "%s.%s.svc.cluster.local" (include "zero2prod.postgresql.fullname" .) .Release.Namespace -}}
+{{- end -}}
+
+{{/*
+Return the postgresql Port
+*/}}
+{{- define "zero2prod.databasePort" -}}
+{{- .Values.postgresql.service.ports.postgresql -}}
+{{- end -}}
+
+
+{{/*
+Return the postgresql Database Name
+*/}}
+{{- define "zero2prod.databaseName" -}}
+{{- .Values.postgresql.auth.database -}}
+{{- end -}}
+
+{{/*
+Return the postgresql User
+*/}}
+{{- define "zero2prod.databaseUser" -}}
+{{- .Values.postgresql.auth.username -}}
+{{- end -}}
+
+{{/*
+Return the postgresql Secret Name
+*/}}
+{{- define "zero2prod.databaseSecretName" -}}
+{{- if .Values.postgresql.auth.existingSecret -}}
+    {{- .Values.postgresql.auth.existingSecret -}}
+{{- else -}}
+    {{- include "zero2prod.postgresql.fullname" . -}}
+{{- end -}}
+{{- end -}}

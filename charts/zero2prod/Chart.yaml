@@ -1,0 +1,24 @@
+apiVersion: v2
+appVersion: 0.1.0
+dependencies:
+  - name: postgresql
+    repository: https://charts.bitnami.com/bitnami
+    version: 12.x.x
+  - name: common
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - bitnami-common
+    version: 2.x.x
+description: An introduction to backend development
+home: https://github.com/IByteAI/helm-charts/tree/main/charts/zero2prod
+keywords:
+  - zero2prod
+  - rust
+  - backend development
+maintainers:
+  - name: npuichigo
+    email: 418121364@qq.com
+name: zero2prod
+sources:
+  - https://github.com/bitnami/containers/tree/main/bitnami/kafka
+version: 0.1.0
