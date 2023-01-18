@@ -22,4 +22,33 @@ entries:
     urls:
     - https://github.com/IByteAI/helm-charts/releases/download/anvil-0.1.1/anvil-0.1.1.tgz
     version: 0.1.1
-generated: "2023-01-16T08:30:14.804760442Z"
+  zero2prod:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2023-01-18T08:42:57.188888293Z"
+    dependencies:
+    - name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 12.x.x
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: An introduction to backend development
+    digest: 51e4d07bf7624b8a31cdaa808ee65f70c47d0ec6a8ede9dbc1edc4bb11fe38ec
+    home: https://github.com/IByteAI/helm-charts/tree/main/charts/zero2prod
+    keywords:
+    - zero2prod
+    - rust
+    - backend development
+    maintainers:
+    - email: 418121364@qq.com
+      name: npuichigo
+    name: zero2prod
+    sources:
+    - https://github.com/bitnami/containers/tree/main/bitnami/kafka
+    urls:
+    - https://github.com/IByteAI/helm-charts/releases/download/zero2prod-0.1.0/zero2prod-0.1.0.tgz
+    version: 0.1.0
+generated: "2023-01-18T08:42:57.188899293Z"
