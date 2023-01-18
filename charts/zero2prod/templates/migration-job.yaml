@@ -1,0 +1,54 @@
+{{- if .Files.Glob "files/migrations/*.sql" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ printf "%s-migrations" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      containers:
+        - name: {{ .Values.migration.name }}
+          image: "{{ .Values.migration.image.repository }}:{{ .Values.migration.image.tag }}"
+          imagePullPolicy: {{ .Values.migration.image.pullPolicy }}
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              until PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST}" -U "${DB_USER}" -p "${DB_PORT}" -d "${DB_NAME}" -c '\q'; do
+                  >&2 echo "Postgres is still unavailable - sleeping"
+                  sleep 5
+              done
+
+              export DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+              sqlx database create
+
+              # copy symbolic links as real file to a separate folder before migrate
+              mkdir /migrations-prune && cp /migrations/* /migrations-prune
+              sqlx migrate run --source /migrations-prune
+          volumeMounts:
+            - name: migrations
+              mountPath: /migrations
+              readOnly: true
+          env:
+            - name: DB_HOST
+              value: {{ include "zero2prod.databaseHost" . | quote }}
+            - name: DB_PORT
+              value: {{ include "zero2prod.databasePort" . | quote }}
+            - name: DB_NAME
+              value: {{ include "zero2prod.databaseName" . | quote }}
+            - name: DB_USER
+              value: {{ include "zero2prod.databaseUser" . | quote }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "zero2prod.databaseSecretName" . }}
+                  key: password
+      restartPolicy: Never
+      volumes:
+        - name: migrations
+          configMap:
+            name: {{ printf "%s-migrations" (include "common.names.fullname" .) }}
+  backoffLimit: 1
+{{end}}
